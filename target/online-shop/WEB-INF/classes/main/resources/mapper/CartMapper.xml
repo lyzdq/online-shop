@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.CartMapper">
+    
+    <resultMap id="BaseResultMap" type="Cart">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="product_id" property="productId"/>
+        <result column="quantity" property="quantity"/>
+        <result column="create_time" property="createTime"/>
+        <association property="product" javaType="Product">
+            <id column="p_id" property="id"/>
+            <result column="p_name" property="name"/>
+            <result column="p_price" property="price"/>
+            <result column="p_image" property="image"/>
+            <result column="p_stock" property="stock"/>
+        </association>
+    </resultMap>
+
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT c.*, 
+               p.id as p_id, p.name as p_name, p.price as p_price, 
+               p.image as p_image, p.stock as p_stock
+        FROM cart c
+        LEFT JOIN product p ON c.product_id = p.id
+        WHERE c.user_id = #{userId}
+        ORDER BY c.create_time DESC
+    </select>
+
+    <select id="findByUserIdAndProductId" resultMap="BaseResultMap">
+        SELECT * FROM cart 
+        WHERE user_id = #{userId} AND product_id = #{productId}
+    </select>
+
+    <insert id="insert" parameterType="Cart" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cart (user_id, product_id, quantity)
+        VALUES (#{userId}, #{productId}, #{quantity})
+    </insert>
+
+    <update id="update" parameterType="Cart">
+        UPDATE cart SET quantity = #{quantity} WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM cart WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByUserId">
+        DELETE FROM cart WHERE user_id = #{userId}
+    </delete>
+</mapper>
+
+
+
+
+

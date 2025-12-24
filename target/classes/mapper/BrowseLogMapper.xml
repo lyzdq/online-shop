@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shop.mapper.BrowseLogMapper">
+    
+    <resultMap id="BaseResultMap" type="BrowseLog">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="product_id" property="productId"/>
+        <result column="browse_time" property="browseTime"/>
+        <result column="ip_address" property="ipAddress"/>
+    </resultMap>
+
+    <resultMap id="WithProductResultMap" type="BrowseLog" extends="BaseResultMap">
+        <association property="product" javaType="Product">
+            <id column="p_id" property="id"/>
+            <result column="p_name" property="name"/>
+            <result column="p_price" property="price"/>
+            <result column="p_image" property="image"/>
+        </association>
+        <association property="user" javaType="User">
+            <id column="u_id" property="id"/>
+            <result column="u_username" property="username"/>
+            <result column="u_email" property="email"/>
+        </association>
+    </resultMap>
+
+    <insert id="insert" parameterType="BrowseLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO browse_log (user_id, product_id, ip_address)
+        VALUES (#{userId}, #{productId}, #{ipAddress})
+    </insert>
+
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT * FROM browse_log 
+        WHERE user_id = #{userId} 
+        ORDER BY browse_time DESC
+    </select>
+
+    <select id="findByProductId" resultMap="BaseResultMap">
+        SELECT * FROM browse_log 
+        WHERE product_id = #{productId} 
+        ORDER BY browse_time DESC
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT * FROM browse_log 
+        ORDER BY browse_time DESC
+    </select>
+
+    <select id="findByUserIdWithProduct" resultMap="WithProductResultMap">
+        SELECT 
+            bl.*,
+            p.id as p_id,
+            p.name as p_name,
+            p.price as p_price,
+            p.image as p_image,
+            u.id as u_id,
+            u.username as u_username,
+            u.email as u_email
+        FROM browse_log bl
+        LEFT JOIN product p ON bl.product_id = p.id
+        LEFT JOIN user u ON bl.user_id = u.id
+        WHERE bl.user_id = #{userId}
+        ORDER BY bl.browse_time DESC
+    </select>
+</mapper>
+
